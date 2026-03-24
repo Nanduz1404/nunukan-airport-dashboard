@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nunukan Airport Dashboard</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+    .actions {
+    display: flex;
+    justify-content: center; /* 🔥 ini bikin ke tengah */
+    gap: 12px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+
+}
+
+.action-btn {
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 18px;
+    min-width: 110px;
+    border-radius: 14px;
+
+    background: linear-gradient(135deg, #eaf2ff, #dbe8ff);
+    color: #1b3c73;
+
+    transition: all 0.25s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    background: linear-gradient(135deg, #2d7ef7, #5fa8ff);
+    color: white;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #dfe9f3, #ffffff);
+}
+
+/* CONTAINER */
+.container {
+    display: flex;
+    padding: 20px;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #f8fbff, #e9f1ff);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo img {
+    width: 90px;
+}
+
+.logo h3 {
+    font-size: 14px;
+    color: #1b3c73;
+    margin-top: 5px;
+}
+
+/* MENU */
+.menu {
+    list-style: none;
+}
+
+.menu li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    color: #3a4a6b;
+    transition: all 0.3s ease;
+}
+
+.menu li i {
+    width: 20px;
+}
+
+.menu li:hover {
+    background: #dbe8ff;
+    transform: translateX(6px);
+}
+
+.menu li:hover i {
+    color: #2d7ef7;
+    transform: scale(1.2);
+}
+
+.menu .active {
+    background: linear-gradient(90deg, #2d7ef7, #5fa8ff);
+    color: white;
+}
+
+/* MAIN */
+.main {
+    flex: 1;
+    margin-left: 20px;
+}
+
+.header h2 {
+    color: #1b3c73;
+}
+
+.profil-header {
+    background: linear-gradient(90deg, #3c7df0, #6bb5ff);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 12px;
+    margin: 15px 0;
+    font-weight: bold;
+}
+
+/* CARD */
+.card {
+    display: flex;
+    gap: 15px;
+    background: white;
+    border-radius: 20px;
+    padding: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.left { width: 40%; }
+.right { width: 60%; }
+
+.left img, .right img {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.right img {
+    height: 200px;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+.left p {
+    font-size: 13px;
+    color: #666;
+}
+
+/* STATS */
+.stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.stat {
+    flex: 1;
+    background: #f2f6ff;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* FOOTER */
+.footer-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 10px;
+}
+
+/* ========================= */
+/* 🔥 BUTTON */
+/* ========================= */
+
+.lapor {
+    position: relative;
+    margin-left: auto;
+    padding: 12px 25px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(90deg, #ff4b4b, #ff7a7a);
+    transition: all 0.35s ease;
+    overflow: visible;
+    z-index: 1;
+}
+
+/* TEXT */
+.lapor .label {
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.lapor .hover {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    opacity: 0;
+    white-space: nowrap;
+}
+
+/* HOVER */
+.lapor:hover {
+    padding: 12px 40px;
+    border-radius: 20px;
+}
+
+.lapor:hover .default {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.lapor:hover .hover {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* 🌊 WAVE FIX */
+.lapor::before,
+.lapor::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 120%;
+    height: 120%;
+    transform: translate(-50%, -50%) scale(1);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 75, 75, 0.6);
+    animation: wave 2s infinite;
+    z-index: 0;
+}
+
+.lapor::after {
+    animation-delay: 1s;
+}
+
+@keyframes wave {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.8);
+        opacity: 0;
+    }
+}
+
+/* RIPPLE */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.7);
+    transform: scale(0);
+    animation: ripple 0.7s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(8);
+        opacity: 0;
+    }
+}
+
+/* ========================= */
+/* 📱 MOBILE ONLY */
+/* ========================= */
+@media (max-width: 768px) {
+
+    body {
+        overflow-x: hidden;
+        padding: 10px;
+    }
+
+    .container {
+        flex-direction: column;
+        padding: 0;
+    }
+
+    /* 🔥 SIDEBAR JADI TOP MENU */
+    .sidebar {
+        width: 100%;
+        display: block;
+        padding: 10px;
+        border-radius: 15px;
+        margin-bottom: 10px;
+    }
+
+    .logo {
+        display: none;
+    }
+
+    /* 🔥 MENU JADI HORIZONTAL */
+    .menu {
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+    }
+
+    .menu li {
+        flex: 1;
+        justify-content: center;
+        font-size: 11px;
+        padding: 8px;
+        border-radius: 10px;
+    }
+
+    .menu li i {
+        display: none;
+    }
+
+    /* 🔥 MAIN FIX */
+    .main {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    /* 🔥 CARD STACK */
+    .card {
+        flex-direction: column;
+        padding: 12px;
+    }
+
+    .left, .right {
+        width: 100%;
+    }
+
+    .right img {
+        height: auto;
+    }
+
+    /* 🔥 BUTTON */
+    .lapor {
+        width: 100%;
+        text-align: center;
+         justify-content: center;
+        align-items: center;
+    }
+
+    .lapor .default {
+        display: none;
+    }
+
+    .lapor .hover {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        
+    }
+    .lapor .hover {
+    position: static; /* 🔥 ubah dari absolute */
+    transform: none;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="sidebar">
+    <div class="logo">
+        <img src="nnx.png">
+        <h3>Nunukan Airport</h3>
+    </div>
+
+    <ul class="menu">
+    <li class="active" onclick="changeUnit('default', event)">
+        <i class="fa-solid fa-gauge"></i>Dashboard
+    </li>
+
+    <li onclick="openProfil()">
+    <i class="fa-solid fa-plane-departure"></i>Profil
+    </li>
+
+    <li onclick="changeUnit('listrik', event)">
+        <i class="fa-solid fa-bolt"></i>Listrik
+    </li>
+
+    <li onclick="changeUnit('elban', event)">
+        <i class="fa-solid fa-screwdriver-wrench"></i>Elban
+    </li>
+
+    <li onclick="changeUnit('bangland', event)">
+        <i class="fa-solid fa-building"></i>Banglan
+    </li>
+
+    <li onclick="changeUnit('pkp', event)">
+        <i class="fa-solid fa-fire-extinguisher"></i>PKP-PK
+    </li>
+</ul>
+</div>
+
+<div class="main">
+    <div class="header">
+        <h2>Dashboard Bandara</h2>
+    </div>
+
+    <div class="profil-header">Unit Penyelenggara Bandar Udara Kelas III Nunukan</div>
+
+    <div class="card">
+        <div class="left">
+            <img src="nnx.png">
+           <p id="descText">Bandara Nunukan merupakan bandara strategis...</p>
+        </div>
+
+        <div class="right">
+           <img id="mainImage" src="1.png">
+
+            <div class="stats" id="statsBox">
+                <div class="stat"><span>Runway </span><br><strong>1.450 m</strong></div>
+                <div class="stat"><span>Flight Schedule </span><br><strong>Senin-Selasa-Rabu</strong></div>
+                <div class="stat"><span>Airlane </span><br><strong>SusiAir</strong></div>
+            </div>
+
+            <div class="footer-card">
+                <div>✔ Pengelola: DIREKTORAT JENDERAL PERHUBUNGAN UDARA </strong></div>
+                
+                <button class="lapor" onclick="kirimWA()">
+                    <span class="label default">Laporkan!</span>
+                    <span class="label hover">🔔 Laporkan Masalah</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script>
+let slideInterval; // 🔥 global
+let currentUnit = "default";
+let unitData = {};
+
+function changeUnit(unit, e) {
+    console.log("klik:", unit);
+
+    const img = document.getElementById("mainImage");
+    const desc = document.getElementById("descText");
+    const stats = document.getElementById("statsBox");
+
+    // 🔥 DATA SEMUA DI SINI
+    const data = {
+        default: {
+            images: ["1.png", "2.png"],
+            desc: "Bandara Nunukan merupakan bandara strategis di wilayah perbatasan Indonesia.",
+            content: `
+                <div class="stat"><span>Runway</span><strong>1.400 m</strong></div>
+                <div class="stat"><span>Flight</span><strong>12 / hari</strong></div>
+                <div class="stat"><span>Penumpang</span><strong>500+</strong></div>
+            `
+        },
+
+        listrik: {
+            images: ["1.png", "2.png"],
+            desc: "Ini halaman listrik",
+            links: {
+                regulasi: "https://drive.google.com/listrik-regulasi",
+                laporan: "https://drive.google.com/listrik-laporan",
+                catatan: "https://drive.google.com/listrik-catatan"
+            },
+            content: `
+                <div class="actions">
+                    <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
+                    <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
+                    <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                </div>`
+        },
+
+        elban: {
+            images: ["1.png", "2.png"],
+            desc: "ELBAN menangani sistem elektronik bandara.",
+            links: {
+                regulasi: "https://drive.google.com/elban-regulasi",
+                laporan: "https://drive.google.com/elban-laporan",
+                catatan: "https://drive.google.com/drive/folders/1ubjsN577y4GhYYCBT6ysJ23Hf7YbwQeU?usp=drive_link"
+            },
+            content: `
+                <div class="actions">
+                    <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
+                    <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
+                    <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                </div>`
+        },
+
+        bangland: {
+            images: ["1.png", "2.png"],
+            desc: "Bangland bertanggung jawab atas infrastruktur bandara.",
+            links: {
+                regulasi: "https://drive.google.com/bangland-regulasi",
+                laporan: "https://drive.google.com/bangland-laporan",
+                catatan: "https://drive.google.com/bangland-catatan"
+            },
+            content: `
+                <div class="actions">
+                    <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
+                    <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
+                    <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                </div>`
+        },
+
+        pkp: {
+            images: ["1.png", "2.png"],
+            desc: "PKP-PK menangani keadaan darurat.",
+            links: {
+                regulasi: "https://drive.google.com/pkp-regulasi",
+                laporan: "https://drive.google.com/pkp-laporan",
+                catatan: "https://drive.google.com/pkp-catatan"
+            },
+            content: `
+                <div class="actions">
+                    <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
+                    <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
+                    <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                </div>`
+        }
+    };
+
+    // 🔥 SET STATE (SETELAH DATA ADA)
+    currentUnit = unit;
+    unitData = data;
+
+    // 🔥 SET GAMBAR PERTAMA
+    img.src = data[unit].images[0];
+
+    // 🔥 RESET SLIDE
+    clearInterval(slideInterval);
+
+    // 🔥 START SLIDE
+    let index = 0;
+    slideInterval = setInterval(() => {
+        index = (index + 1) % data[unit].images.length;
+        img.src = data[unit].images[index];
+    }, 2000);
+
+    // 🔥 UPDATE CONTENT
+    desc.innerText = data[unit].desc;
+    stats.innerHTML = data[unit].content;
+
+    // 🔥 ACTIVE MENU
+    document.querySelectorAll(".menu li").forEach(li => li.classList.remove("active"));
+    e.currentTarget.classList.add("active");
+}
+
+// 🔥 FUNCTION UNTUK TOMBOL
+function openLink(type) {
+    const link = unitData[currentUnit]?.links?.[type];
+
+    if (link) {
+        window.open(link, "_blank");
+    } else {
+        alert("Link tidak tersedia");
+    }
+
+}
+function openProfil() {
+    window.open("https://nunukan-airport.com/", "_blank");
+    }
+    function kirimWA() {
+    const nomor = "6285157446716"; // 🔥 ganti nomor lo
+
+    const pesan = encodeURIComponent(
+        "Halo Admin Bandara Nunukan,\n\n" +
+        "Saya ingin melaporkan:\n" +
+        "- Unit: " + currentUnit + "\n" +
+        "- Masalah: \n\n" +
+        "Terima kasih."
+    );
+
+    const url = "https://wa.me/" + nomor + "?text=" + pesan;
+
+    window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
