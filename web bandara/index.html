@@ -438,7 +438,7 @@ body {
             <div class="footer-card">
                 <div>✔ Pengelola: DIREKTORAT JENDERAL PERHUBUNGAN UDARA </strong></div>
                 
-                <button class="lapor">
+                <button class="lapor" onclick="kirimWA()">
                     <span class="label default">Laporkan!</span>
                     <span class="label hover">🔔 Laporkan Masalah</span>
                 </button>
@@ -578,6 +578,21 @@ function openLink(type) {
 function openProfil() {
     window.open("https://nunukan-airport.com/", "_blank");
     }
+    function kirimWA() {
+    const nomor = "6285157446716"; // 🔥 ganti nomor lo
+
+    const pesan = encodeURIComponent(
+        "Halo Admin Bandara Nunukan,\n\n" +
+        "Saya ingin melaporkan:\n" +
+        "- Unit: " + currentUnit + "\n" +
+        "- Masalah: \n\n" +
+        "Terima kasih."
+    );
+
+    const url = "https://wa.me/" + nomor + "?text=" + pesan;
+
+    window.open(url, "_blank");
+}
 </script>
 
 </body>
