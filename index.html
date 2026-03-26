@@ -10,6 +10,74 @@
 
 <style> 
 
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    width: 320px;
+    animation: fadeUp 0.3s ease;
+}
+
+.modal textarea {
+    width: 100%;
+    height: 100px;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.lapor {
+    transition: 0.3s;
+}
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.4s ease forwards;
+}
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.unit-card {
+    background: #f2f6ff;
+    padding: 10px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.unit-card img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 5px;
+}
+
+.unit-card:hover {
+    transform: translateY(-5px);
+    background: #dbe8ff;
+}
     .actions {
     display: flex;
     justify-content: center; /* 🔥 ini bikin ke tengah */
@@ -405,12 +473,13 @@ body {
     </li>
 
     <li onclick="changeUnit('bangland', event)">
-        <i class="fa-solid fa-building"></i>Bangland
+        <i class="fa-solid fa-building"></i>Banglan
     </li>
 
     <li onclick="changeUnit('pkp', event)">
         <i class="fa-solid fa-fire-extinguisher"></i>PKP-PK
     </li>
+
 </ul>
 </div>
 
@@ -439,7 +508,7 @@ body {
             <div class="footer-card">
                 <div>✔ Pengelola: DIREKTORAT JENDERAL PERHUBUNGAN UDARA </strong></div>
                 
-                <button class="lapor" onclick="kirimWA()">
+                <button id="laporBtn" class="lapor" onclick="showLaporan()">
                     <span class="label default">Laporkan!</span>
                     <span class="label hover">🔔 Laporkan Masalah</span>
                 </button>
@@ -451,17 +520,44 @@ body {
 </div>
 
 <script>
+let laporanData = [];
 let slideInterval; // 🔥 global
+let currentView = "dashboard";
 let currentUnit = "default";
 let unitData = {};
 
-function changeUnit(unit, e) {
-    console.log("klik:", unit);
-
+function loadDashboard() {
     const img = document.getElementById("mainImage");
     const desc = document.getElementById("descText");
     const stats = document.getElementById("statsBox");
 
+    img.src = "1.png";
+
+    desc.innerText = "Bandara Nunukan merupakan bandara strategis di wilayah perbatasan Indonesia.";
+
+    stats.innerHTML = `
+        <div class="stat"><span>Runway</span><strong>1.400 m</strong></div>
+        <div class="stat"><span>Flight</span><strong>12 / hari</strong></div>
+        <div class="stat"><span>Penumpang</span><strong>500+</strong></div>
+    `;
+}
+
+function changeUnit(unit, e) {
+    console.log("klik:", unit);
+    currentView = "unit"; 
+    const img = document.getElementById("mainImage");
+    const desc = document.getElementById("descText");
+    const stats = document.getElementById("statsBox");
+    const laporBtn = document.getElementById("laporBtn");
+
+    if (unit === "default") {
+    currentView = "dashboard";
+    document.getElementById("laporBtn").style.display = "block";
+
+    loadDashboard(); // 🔥 RESET TOTAL
+    return;
+}
+    
     // 🔥 DATA SEMUA DI SINI
     const data = {
         default: {
@@ -487,6 +583,7 @@ function changeUnit(unit, e) {
                     <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
                     <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
                     <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                    <button class="action-btn" onclick="openPekerjaan()">📋 Pekerjaan</button>
                 </div>`
         },
 
@@ -503,6 +600,7 @@ function changeUnit(unit, e) {
                     <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
                     <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
                     <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                    <button class="action-btn" onclick="openPekerjaan()">📋 Pekerjaan</button>
                 </div>`
         },
 
@@ -519,6 +617,7 @@ function changeUnit(unit, e) {
                     <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
                     <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
                     <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                    <button class="action-btn" onclick="openPekerjaan()">📋 Pekerjaan</button>
                 </div>`
         },
 
@@ -535,6 +634,7 @@ function changeUnit(unit, e) {
                     <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
                     <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
                     <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                    <button class="action-btn" onclick="openPekerjaan()">📋 Pekerjaan</button>
                 </div>`
         }
     };
@@ -558,6 +658,7 @@ function changeUnit(unit, e) {
 
     // 🔥 UPDATE CONTENT
     desc.innerText = data[unit].desc;
+
     stats.innerHTML = data[unit].content;
 
     // 🔥 ACTIVE MENU
@@ -594,7 +695,159 @@ function openProfil() {
 
     window.open(url, "_blank");
 }
-</script>
 
+function openPekerjaan() {
+    const desc = document.getElementById("descText");
+    const stats = document.getElementById("statsBox");
+    const img = document.getElementById("mainImage");
+    currentView = "pekerjaan";
+    document.getElementById("laporBtn").style.display = "none";
+
+    desc.innerText = "Daftar laporan masuk";
+    img.src = "1.png";
+
+    if (laporanData.length === 0) {
+        stats.innerHTML = `<div class="stat">Belum ada laporan</div>`;
+        return;
+    }
+
+    stats.innerHTML = laporanData
+    .filter(item => item.unit === currentUnit)
+    .map((item, index) => `
+        <div class="stat fade-in">
+            🔴 ${item.unit.toUpperCase()}<br>
+            ${item.masalah}<br>
+            <small>${item.waktu}</small><br><br>
+
+          <button onclick="selesaikanById('${item.waktu}')">Selesaikan</button>
+        </div>
+    `).join("");
+    }
+
+function selesaikan(index) {
+    laporanData[index].status = "selesai";
+    laporanData[index].selesai = new Date().toLocaleTimeString();
+
+    alert("Laporan diselesaikan!");
+
+    changeUnit(currentUnit, { currentTarget: document.querySelector(".menu li.active") });
+    openPekerjaan();
+}
+function showLaporan() {
+    const desc = document.getElementById("descText");
+    const stats = document.getElementById("statsBox");
+    const img = document.getElementById("mainImage");
+    document.getElementById("laporBtn").style.display = "none";
+    // kosongin deskripsi
+    desc.innerText = "Pilih unit untuk melaporkan masalah";
+
+    // ganti gambar utama (opsional)
+    img.src = "1.png";
+
+    // 🔥 GANTI ISI CARD
+    stats.innerHTML = ` <div class="fade-in" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+            
+            <div class="unit-card" onclick="pilihUnitLaporan('listrik')">
+                <img src="1.png">
+                <p>Listrik</p>
+            </div>
+
+            <div class="unit-card" onclick="pilihUnitLaporan('elban')">
+                <img src="1.png">
+                <p>Elban</p>
+            </div>
+
+            <div class="unit-card" onclick="pilihUnitLaporan('bangland')">
+                <img src="1.png">
+                <p>Bangland</p>
+            </div>
+
+            <div class="unit-card" onclick="pilihUnitLaporan('pkp')">
+                <img src="1.png">
+                <p>PKP-PK</p>
+            </div>
+
+        </div>
+    `;
+}
+function pilihUnitLaporan(unit) {
+    currentUnit = unit;
+
+    document.getElementById("modalLaporan").style.display = "flex";
+}
+
+function kirimLaporan() {
+    const input = document.getElementById("inputMasalah");
+    const masalah = input.value;
+
+    if (!masalah) {
+        alert("Isi dulu masalahnya!");
+        return;
+    }
+
+    const waktu = new Date().toLocaleTimeString();
+
+    laporanData.push({
+        unit: currentUnit,
+        masalah: masalah,
+        waktu: waktu,
+        status: "baru"
+    });
+
+    input.value = "";
+    closeModal();
+
+    alert("Laporan berhasil dikirim!");
+}
+function closeModal() {
+    document.getElementById("modalLaporan").style.display = "none";
+}
+
+function selesaikanById(waktu) {
+    const data = laporanData.find(item => item.waktu === waktu);
+
+    if (data) {
+        data.status = "selesai";
+        data.selesai = new Date().toLocaleTimeString();
+    }
+
+    function kirimLaporan() {
+    const input = document.getElementById("inputMasalah");
+    const masalah = input.value;
+
+    if (!masalah) {
+        alert("Isi dulu masalahnya!");
+        return;
+    }
+
+    const waktu = new Date().toLocaleTimeString();
+
+    laporanData.push({
+        unit: currentUnit,
+        masalah: masalah,
+        waktu: waktu,
+        status: "baru"
+    });
+
+    input.value = "";
+    closeModal();
+
+    openPekerjaan(); // 🔥 AUTO PINDAH
+}
+}
+
+</script>
+<div id="modalLaporan" class="modal">
+  <div class="modal-content">
+    <h3>Buat Laporan</h3>
+
+    <textarea id="inputMasalah" placeholder="Tulis masalah di sini..."></textarea>
+
+    <div class="modal-actions">
+      <button onclick="kirimLaporan()">Kirim</button>
+      <button onclick="closeModal()">Batal</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
