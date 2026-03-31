@@ -10,6 +10,74 @@
 
 <style> 
 
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    width: 320px;
+    animation: fadeUp 0.3s ease;
+}
+
+.modal textarea {
+    width: 100%;
+    height: 100px;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.lapor {
+    transition: 0.3s;
+}
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.4s ease forwards;
+}
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.unit-card {
+    background: #f2f6ff;
+    padding: 10px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.unit-card img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 5px;
+}
+
+.unit-card:hover {
+    transform: translateY(-5px);
+    background: #dbe8ff;
+}
     .actions {
     display: flex;
     justify-content: center; /* 🔥 ini bikin ke tengah */
@@ -374,6 +442,83 @@ body {
     transform: none;
 }
 }
+.dot-red {
+    width: 10px;
+    height: 10px;
+    background: red;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+
+    animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(1.3);
+        box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.2);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}.notif-dot {
+    width: 8px;
+    height: 8px;
+    background: red;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 6px;
+
+    animation: pulse 1s infinite;
+}
+.status-pending {
+    color: #2d7ef7;
+    font-weight: bold;
+    animation: pulseBlue 1s infinite;
+}
+
+@keyframes pulseBlue {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.status-selesai {
+    color: green;
+    font-weight: bold;
+}
+/* 🔥 TAMBAH INI DI BAWAHNYA */
+.notif-dot.hidden {
+    display: none;
+}
+.dot-green {
+    width: 10px;
+    height: 10px;
+    background: green;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.dot-blue {
+    width: 10px;
+    height: 10px;
+    background: #2d7ef7;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulseBlue 1s infinite;
+}
 </style>
 </head>
 
@@ -398,19 +543,24 @@ body {
 
     <li onclick="changeUnit('listrik', event)">
         <i class="fa-solid fa-bolt"></i>Listrik
+         <span class="notif-dot hidden notif-listrik"></span>
     </li>
 
     <li onclick="changeUnit('elban', event)">
         <i class="fa-solid fa-screwdriver-wrench"></i>Elban
+         <span class="notif-dot hidden notif-elban"></span>
     </li>
 
     <li onclick="changeUnit('bangland', event)">
         <i class="fa-solid fa-building"></i>Banglan
+         <span class="notif-dot hidden notif-bangland"></span>
     </li>
 
     <li onclick="changeUnit('pkp', event)">
         <i class="fa-solid fa-fire-extinguisher"></i>PKP-PK
+         <span class="notif-dot hidden notif-pkp"></span>
     </li>
+
 </ul>
 </div>
 
@@ -439,7 +589,7 @@ body {
             <div class="footer-card">
                 <div>✔ Pengelola: DIREKTORAT JENDERAL PERHUBUNGAN UDARA </strong></div>
                 
-                <button class="lapor" onclick="kirimWA()">
+                <button id="laporBtn" class="lapor" onclick="showLaporan()">
                     <span class="label default">Laporkan!</span>
                     <span class="label hover">🔔 Laporkan Masalah</span>
                 </button>
@@ -451,21 +601,53 @@ body {
 </div>
 
 <script>
+let laporanData = [];
 let slideInterval; // 🔥 global
+let currentView = "dashboard";
 let currentUnit = "default";
 let unitData = {};
 
-function changeUnit(unit, e) {
-    console.log("klik:", unit);
-
+function loadDashboard() {
     const img = document.getElementById("mainImage");
     const desc = document.getElementById("descText");
     const stats = document.getElementById("statsBox");
 
+    img.src = ["1.png","2.png"];
+
+    desc.innerText = "Bandara Nunukan merupakan bandara strategis di wilayah perbatasan Indonesia.";
+
+    stats.innerHTML = `
+        <div class="stat"><span>Runway</span><strong>1.400 m</strong></div>
+        <div class="stat"><span>Flight</span><strong>12 / hari</strong></div>
+        <div class="stat"><span>Penumpang</span><strong>500+</strong></div>
+    `;
+}
+
+function changeUnit(unit, e) {
+    console.log("klik:", unit);
+    currentView = "unit"; 
+    const img = document.getElementById("mainImage");
+    const desc = document.getElementById("descText");
+    const stats = document.getElementById("statsBox");
+    const laporBtn = document.getElementById("laporBtn");
+    laporBtn.style.display = "none";
+
+   if (unit === "default") {
+    currentView = "dashboard";
+    laporBtn.style.display = "block";
+    loadDashboard();
+
+    // 🔥 TAMBAH INI
+    document.querySelectorAll(".menu li").forEach(li => li.classList.remove("active"));
+    e.currentTarget.classList.add("active");
+
+    return;
+}
+    
     // 🔥 DATA SEMUA DI SINI
     const data = {
         default: {
-            images: ["1.png", "2.png"],
+            images: [".png", "2.png"],
             desc: "Bandar Udara Nunukan merupakan Bandara yang berada dibawah Kementerian Perhubungan yang melayani penerbangan Domestik di wilayah Provinsi Kalimantan Utara.",
             content: `
                 <div class="stat"><span>Runway</span><strong>1.400 m</strong></div>
@@ -475,7 +657,7 @@ function changeUnit(unit, e) {
         },
 
         listrik: {
-            images: ["1.png", "2.png"],
+            images: ["listrik.png", "2.png"],
             desc: "Unit Listrik Bandara merupakan Unit yang bertugas untuk mengatur dan menjaga kestabilan distribusi Kelistrikan seluruh Bandara",
             links: {
                 regulasi: "https://drive.google.com/drive/folders/1T2fFdkatiRBtTunPUygUXQX906go_e78?usp=drive_link",
@@ -487,6 +669,7 @@ function changeUnit(unit, e) {
                     <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
                     <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
                     <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                    <button class="action-btn" onclick="openPekerjaan()">📋 Pekerjaan <span class="notif-dot hidden notif-pekerjaan"></span></button>
                 </div>`
         },
 
@@ -503,6 +686,7 @@ function changeUnit(unit, e) {
                     <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
                     <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
                     <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                    <button class="action-btn" onclick="openPekerjaan()">📋 Pekerjaan <span class="notif-dot hidden notif-pekerjaan"></span></button>
                 </div>`
         },
 
@@ -519,6 +703,7 @@ function changeUnit(unit, e) {
                     <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
                     <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
                     <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                    <button class="action-btn" onclick="openPekerjaan()">📋 Pekerjaan <span class="notif-dot hidden notif-pekerjaan"></span></button>
                 </div>`
         },
 
@@ -535,6 +720,7 @@ function changeUnit(unit, e) {
                     <button class="action-btn" onclick="openLink('regulasi')">📘 Regulasi</button>
                     <button class="action-btn" onclick="openLink('laporan')">📊 Laporan</button>
                     <button class="action-btn" onclick="openLink('catatan')">📝 Catatan</button>
+                    <button class="action-btn" onclick="openPekerjaan()">📋 Pekerjaan <span class="notif-dot hidden notif-pekerjaan"></span></button>
                 </div>`
         }
     };
@@ -546,27 +732,41 @@ function changeUnit(unit, e) {
     // 🔥 SET GAMBAR PERTAMA
     img.src = data[unit].images[0];
 
-    // 🔥 RESET SLIDE
-    clearInterval(slideInterval);
+   clearInterval(slideInterval);
 
-    // 🔥 START SLIDE
+// ❌ hanya jalan di dashboard
+    if (unit === "default") {
     let index = 0;
     slideInterval = setInterval(() => {
         index = (index + 1) % data[unit].images.length;
         img.src = data[unit].images[index];
     }, 2000);
+}
 
     // 🔥 UPDATE CONTENT
     desc.innerText = data[unit].desc;
-    stats.innerHTML = data[unit].content;
 
+    stats.innerHTML = data[unit].content;
+    // 🔥 CEK ADA LAPORAN DI UNIT INI
+const adaLaporan = laporanData.some(item => 
+    item.unit === unit && item.status !== "selesai"
+);
+
+// 🔥 NYALAIN / MATIIN DOT TOMBOL PEKERJAAN
+document.querySelectorAll(".notif-pekerjaan").forEach(el => {
+    if (adaLaporan) {
+        el.classList.remove("hidden");
+    } else {
+        el.classList.add("hidden");
+    }
+});
     // 🔥 ACTIVE MENU
     document.querySelectorAll(".menu li").forEach(li => li.classList.remove("active"));
     e.currentTarget.classList.add("active");
 }
 
-// 🔥 FUNCTION UNTUK TOMBOL
-function openLink(type) {
+    // 🔥 FUNCTION UNTUK TOMBOL
+    function openLink(type) {
     const link = unitData[currentUnit]?.links?.[type];
 
     if (link) {
@@ -594,7 +794,330 @@ function openProfil() {
 
     window.open(url, "_blank");
 }
-</script>
 
+function openPekerjaan() {
+    // ❌ MATIKAN NOTIF SIDEBAR
+document.querySelectorAll(".notif-" + currentUnit).forEach(el => {
+    el.classList.add("hidden");
+});
+
+// ❌ MATIKAN NOTIF TOMBOL
+document.querySelectorAll(".notif-pekerjaan").forEach(el => {
+    el.classList.add("hidden");
+});
+    const desc = document.getElementById("descText");
+    const stats = document.getElementById("statsBox");
+    const img = document.getElementById("mainImage");
+    currentView = "pekerjaan";
+    document.getElementById("laporBtn").style.display = "none";
+
+    desc.innerText = "Daftar laporan masuk";
+    img.src = "listrik.png";
+
+    if (laporanData.length === 0) {
+        stats.innerHTML = `<div class="stat">Belum ada laporan</div>`;
+        return;
+    }
+
+    stats.innerHTML = laporanData
+    .filter(item => item.unit === currentUnit)
+    .map((item, index) => `
+    <div class="stat fade-in">
+    ${item.status === "selesai" 
+    ? `<span class="dot-green"></span>` 
+    : item.status === "pending"
+    ? `<span class="dot-blue"></span>`
+    : `<span class="dot-red"></span>`
+}
+     ${item.unit.toUpperCase()}
+
+    ${item.masalah}<br>
+    ${item.fotoLaporan ? `<img src="${item.fotoLaporan}" width="100"><br>` : ""}
+    <small>${item.waktu}</small><br><br>
+
+    ${item.status === "selesai" ? `
+        <span class="status-selesai">✔ Selesai</span><br>
+        <button onclick="editPekerjaan('${item.waktu}')">Edit</button>
+
+        <b>Masalah (Laporan):</b><br>
+        ${item.masalah || "-"}<br><br>
+
+        <b>Temuan (Teknisi):</b><br>
+        ${item.temuan || "-"}<br><br>
+
+        <b>Penyelesaian:</b><br>
+        ${item.penyelesaian || "-"}<br>
+
+        ${item.fotoSelesai ? `<br><img src="${item.fotoSelesai}" width="100">` : ""}
+    ` : item.status === "pending" ? `
+        <span class="status-pending">⏳ Pending</span><br><br>
+
+        <button onclick="openModalSelesai('${item.waktu}')">Selesaikan</button>
+    ` : `
+        <button onclick="openModalSelesai('${item.waktu}')">Selesaikan</button>
+        <button onclick="setPending('${item.waktu}')">Pending</button>
+    `}
+</div>
+`).join("");
+}
+
+function setPending(waktu) {
+    const data = laporanData.find(item => item.waktu === waktu);
+    if (!data) return;
+
+    data.status = "pending";
+
+    alert("Laporan dijadikan pending (menunggu pimpinan)");
+
+    openPekerjaan();
+}
+
+function selesaikan(index) {
+    laporanData[index].status = "selesai";
+    laporanData[index].selesai = new Date().toLocaleTimeString();
+
+    alert("Laporan diselesaikan!");
+
+    changeUnit(currentUnit, { currentTarget: document.querySelector(".menu li.active") });
+    openPekerjaan();
+}
+function showLaporan() {
+    const desc = document.getElementById("descText");
+    const stats = document.getElementById("statsBox");
+    const img = document.getElementById("mainImage");
+    document.getElementById("laporBtn").style.display = "none";
+    // kosongin deskripsi
+    desc.innerText = "Pilih unit untuk melaporkan masalah";
+
+    // ganti gambar utama (opsional)
+    img.src = "1.png";
+
+    // 🔥 GANTI ISI CARD
+    stats.innerHTML = ` <div class="fade-in" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+            
+            <div class="unit-card" onclick="pilihUnitLaporan('listrik')">
+                <img src="1.png">
+                <p>Listrik</p>
+            </div>
+
+            <div class="unit-card" onclick="pilihUnitLaporan('elban')">
+                <img src="1.png">
+                <p>Elban</p>
+            </div>
+
+            <div class="unit-card" onclick="pilihUnitLaporan('bangland')">
+                <img src="1.png">
+                <p>Bangland</p>
+            </div>
+
+            <div class="unit-card" onclick="pilihUnitLaporan('pkp')">
+                <img src="1.png">
+                <p>PKP-PK</p>
+            </div>
+
+        </div>
+    `;
+}
+function pilihUnitLaporan(unit) {
+    currentUnit = unit;
+
+    document.getElementById("modalLaporan").style.display = "flex";
+}
+
+function kirimLaporan() {
+    const input = document.getElementById("inputMasalah");
+    const fotoInput = document.getElementById("inputFotoLaporan");
+
+    const masalah = input.value;
+
+    if (!masalah) {
+        alert("Isi dulu masalahnya!");
+        return;
+    }
+
+    const waktu = new Date().toLocaleTimeString();
+
+    // 🔥 kalau ada foto
+    if (fotoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+
+            laporanData.push({
+                unit: currentUnit,
+                masalah: masalah,
+                waktu: waktu,
+                status: "baru",
+                fotoLaporan: e.target.result // 🔥 simpan foto
+            });
+
+            afterKirim();
+        };
+        reader.readAsDataURL(fotoInput.files[0]);
+    } else {
+        // tanpa foto
+        laporanData.push({
+            unit: currentUnit,
+            masalah: masalah,
+            waktu: waktu,
+            status: "baru"
+        });
+
+        afterKirim();
+    }
+}
+function afterKirim() {
+    // 🔴 notif sidebar
+    document.querySelectorAll(".notif-" + currentUnit).forEach(el => {
+        el.classList.remove("hidden");
+    });
+
+    // 🔴 notif pekerjaan
+    document.querySelectorAll(".notif-pekerjaan").forEach(el => {
+        el.classList.remove("hidden");
+    });
+
+    document.getElementById("inputMasalah").value = "";
+    document.getElementById("inputFotoLaporan").value = "";
+
+    closeModal();
+
+    alert("Laporan berhasil dikirim!");
+}
+function closeModal() {
+    document.getElementById("modalLaporan").style.display = "none";
+}
+
+function selesaikanById(waktu) {
+    const data = laporanData.find(item => item.waktu === waktu);
+
+    if (data) {
+        data.status = "selesai";
+        data.selesai = new Date().toLocaleTimeString();
+    }
+
+    openPekerjaan();
+}
+
+let currentSelesaiId = null;
+
+function openModalSelesai(waktu) {
+    currentSelesaiId = waktu;
+    document.getElementById("modalSelesai").style.display = "flex";
+}
+
+function closeModalSelesai() {
+    document.getElementById("modalSelesai").style.display = "none";
+}
+
+function submitSelesai() {
+    const masalah = document.getElementById("inputMasalahSelesai").value;
+    const penyelesaian = document.getElementById("inputPenyelesaian").value;
+    const fotoInput = document.getElementById("inputFoto");
+
+   if (!penyelesaian) {
+    alert("Isi penyelesaian dulu!");
+    return;
+    }
+
+    if (!fotoInput.files[0]) {
+    alert("Upload foto penyelesaian!");
+    return;
+    }
+
+     const data = laporanData.find(item => item.waktu === currentSelesaiId);
+     
+
+    if (!data) return;
+
+    data.status = "selesai";
+    data.temuan = masalah;
+    data.penyelesaian = penyelesaian;
+
+    
+    // 🔥 ambil foto
+    if (fotoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            data.fotoSelesai = e.target.result;
+
+            finishSave();
+        };
+        reader.readAsDataURL(fotoInput.files[0]);
+    } else {
+        finishSave();
+    }
+    data.updatedAt = new Date().toLocaleTimeString();
+}
+
+function finishSave() {
+    closeModalSelesai();
+
+    // reset input
+    document.getElementById("inputMasalahSelesai").value = "";
+    document.getElementById("inputPenyelesaian").value = "";
+    document.getElementById("inputFoto").value = "";
+
+    openPekerjaan();
+}
+function editPekerjaan(waktu) {
+    const data = laporanData.find(item => item.waktu === waktu);
+    if (!data) return;
+
+    currentSelesaiId = waktu;
+
+    // isi ulang input modal
+    document.getElementById("inputMasalahSelesai").value = data.temuan || "";
+    document.getElementById("inputPenyelesaian").value = data.penyelesaian || "";
+
+    document.getElementById("modalSelesai").style.display = "flex";
+}
+</script>
+    <div style="background:#f2f6ff; padding:8px; border-radius:8px; margin-top:5px;">
+    <div style="background:#f2f6ff; padding:8px; border-radius:8px;">
+    <b>Masalah (Laporan):</b><br>
+    ${item.masalah || "-"}<br><br>
+
+    <b>Temuan (Teknisi):</b><br>
+    ${item.temuan || "-"}<br><br>
+
+    <b>Penyelesaian:</b><br>
+    ${item.penyelesaian || "-"}
+
+    <b style="color:#555;">Masalah (User)</b>
+    <b style="color:#2d7ef7;">Temuan (Teknisi)</b>
+    <b style="color:green;">Penyelesaian</b>
+
+</div>
+</div>
+<!-- 🔥 TAMBAH MODAL SELESAI DI SINI -->
+<div id="modalSelesai" class="modal">
+  <div class="modal-content">
+    <h3>Dokumentasi Pekerjaan</h3>
+
+    <textarea id="inputMasalahSelesai" placeholder="Masalah..."></textarea>
+    <textarea id="inputPenyelesaian" placeholder="Penyelesaian..."></textarea>
+
+    <input type="file" id="inputFoto" accept="image/*">
+
+    <div class="modal-actions">
+      <button onclick="submitSelesai()">Simpan</button>
+      <button onclick="closeModalSelesai()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalLaporan" class="modal">
+  <div class="modal-content">
+    <h3>Buat Laporan</h3>
+
+    <textarea id="inputMasalah" placeholder="Tulis masalah di sini..."></textarea>
+    <input type="file" id="inputFotoLaporan" accept="image/*">
+
+    <div class="modal-actions">
+      <button onclick="kirimLaporan()">Kirim</button>
+      <button onclick="closeModal()">Batal</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
